@@ -1,0 +1,16 @@
+# phpMyAdmin : http://localhost:3000/
+version: '3.7'
+services:
+  phpmyadmin:
+# https://hub.docker.com/r/phpmyadmin/phpmyadmin/tags
+#    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+    - PMA_ARBITRARY=1
+#    - PMA_HOSTS=mysql
+    - PMA_USER=docker     # phpmyadminにログインするユーザを設定
+    - PMA_PASSWORD=docker # phpmyadminにログインするユーザのパスワードを設定
+    volumes:
+      - ./docker/phpmyadmin/sessions:/sessions
+    ports:
+    - 3000:80
