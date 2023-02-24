@@ -1,0 +1,9 @@
+# https://hub.docker.com/_/postgres/tags
+FROM postgres:14.5
+
+#USER 1000
+
+COPY ./ca/server.crt /var/lib/postgresql/server.crt
+COPY ./ca/server.key /var/lib/postgresql/server.key
+RUN chown postgres /var/lib/postgresql/server.key && \
+    chmod 600 /var/lib/postgresql/server.key

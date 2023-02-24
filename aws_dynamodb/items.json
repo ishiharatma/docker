@@ -1,0 +1,14 @@
+{
+  "Items" : [
+    {
+      "PutRequest": {
+        "Item": {
+          "id": { "S": "10"},
+          "item_name": { "S":"Tea"},
+          "price": {"N": "120" }
+        }
+      }
+    },
+    :
+    :
+}

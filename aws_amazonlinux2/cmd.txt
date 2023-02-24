@@ -1,0 +1,7 @@
+ps  ssh-keygen
+
+docker build -t amazonlinux2-sshd .
+
+$ docker run --privileged --rm -d -p 2222:22 --name amazonlinux2-sshd-container amazonlinux2-sshd /sbin/init
+
+docker stop amazonlinux2-sshd-container

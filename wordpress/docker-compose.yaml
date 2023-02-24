@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+    wordpress:
+      image: wordpress
+      mem_limit: 268435456
+      ports:
+        - "80:80"
+      links:
+        - mysql
+
+    mysql:
+      image: mysql
+      mem_limit: 268435456
+      environment:
+        MYSQL_ROOT_PASSWORD: password

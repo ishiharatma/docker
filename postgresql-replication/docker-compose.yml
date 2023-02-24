@@ -1,0 +1,79 @@
+# docker-compose -f docker-compose.yml up --build
+# docker-compose -f docker-compose.yml build
+version: '3'
+
+#volumes:
+#  postgres_data:
+#      driver: local
+#  postgres_replica_data:
+#      driver: local
+
+services:
+  primary:
+    build:
+      context: .
+      dockerfile: DockerfilePostgreSQL
+    container_name: postgres_primary
+    #restart: always
+    volumes:
+      - ./docker/primary/data:/var/lib/postgresql/data
+      - ./primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./primary/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./primary/init.sh:/docker-entrypoint-initdb.d/init.sh
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    ports:
+      - 15432:5432
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key  -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 1s
+      timeout: 1s
+      retries: 5
+  replica:
+    build:
+      context: .
+      dockerfile: DockerfilePostgreSQL
+    container_name: postgres_replica
+    #restart: always
+    entrypoint: /entrypoint.sh
+    volumes:
+      - ./docker/replica/data:/var/lib/postgresql/data
+      - ./replica/entrypoint.sh:/entrypoint.sh
+      - ./replica/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./replica/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    ports:
+      - 25432:5432
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 1s
+      timeout: 1s
+      retries: 5
+    depends_on:
+      primary:
+        condition: service_healthy
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin4_for_replication
+    ports:
+      - 8000:80
+    volumes:
+      - ./docker/pgadmin4:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    hostname: pgadmin4
+    links:
+      - primary
+      - replica
+    depends_on:
+      - primary
+      - replica
+    #restart: always
